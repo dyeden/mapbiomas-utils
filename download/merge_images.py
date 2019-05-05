@@ -6,11 +6,15 @@ def get_list_names_raster():
     return ['AMAZONIA', 'CAATINGA', 'CERRADO', 'MATAATLANTICA', 'PAMPA', 'PANTANAL']
 
 def buildvrt(folder_path, folder_vrt, biome):
+    
     osCommand = "gdalbuildvrt  " + folder_vrt + "/" + biome + ".vrt "   + folder_path + "/" + biome + "*"
     os.system(osCommand)
 
+def add_colors_legend(folder_path, biome):
+
 def merge_images(folder_path, biome):
-    osCommand = 'gdal_translate -of GTiff -co "COMPRESS=LZW" ' + folder_path + "/" + biome + ".vrt " + folder_path + "/" + biome + ".tif"
+    #TODO change gdal translate example: gdal_translate -of GTiff -a_nodata 0 -co "TILED=YES" -co BLOCKXSIZE=256 -co BLOCKYSIZE=256 -co BIGTIFF=YES -co COMPRESS=LZW CERRADO.vrt CERRADO2.tif
+    osCommand = 'gdal_translate -of GTiff -a_nodata 0 -co BIGTIFF=YES -co "COMPRESS=LZW" ' + folder_path + "/" + biome + ".vrt " + folder_path + "/" + biome + ".tif"
     os.system(osCommand)
 
 def execute(raster_name, folder_path, folder_vrt):
@@ -32,12 +36,20 @@ def execute(raster_name, folder_path, folder_vrt):
             print('executing merge', name)
             merge_images(folder_vrt, name)
 
+    else:
+        print('executing vrt', raster_name)
+        buildvrt(folder_path, folder_vrt, raster_name)
+        print('executing merge', raster_name)
+        #TODO add script that will create legend and colors
+        merge_images(folder_vrt, raster_name)
+
+
 def interface():
     parser = argparse.ArgumentParser(description='Merge the images for download')
 
     parser.add_argument('name', type=str, help='choose the raster name', 
                         choices=['AMAZONIA', 'CAATINGA', 'CERRADO', 'MATAATLANTICA', 
-                        'PAMPA', 'PANTANAL', 'all']) #TODO only 'all' works 
+                        'PAMPA', 'PANTANAL', 'all']) 
 
     parser.add_argument('folder_path', type=str,  help='choose the raster folder')
 
